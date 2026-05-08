@@ -10,37 +10,40 @@ import { createBaseMarker } from './createBaseMarker.js';
 export function createTriangleListMarker(record, index, options = {}) {
   const marker = createBaseMarker(record, index, options);
   marker.type = MARKER_TYPES.TRIANGLE_LIST;
-  marker.points = createTriangleListPoints(record);
-  marker.colors = createTriangleListColors(record);
+  const triangles = createTriangleListGeometry(record);
+  marker.points = triangles.points;
+  marker.colors = triangles.colors;
   return marker.points.length ? marker : null;
 }
 
 /**
  * 將帶索引 mesh 面展開成 TRIANGLE_LIST 需要的明確點順序。
+ *
+ * ROS TRIANGLE_LIST 每三個 points 代表一個三角形。若某個 face 缺少頂點，
+ * 該 face 會被跳過，避免輸出不是三的倍數的非法 marker。
  */
-function createTriangleListPoints(record) {
+function createTriangleListGeometry(record) {
   const points = [];
-  for (const face of record.faces || []) {
-    for (const vertexIndex of face) {
-      // Marker TRIANGLE_LIST 需要繪製順序的點，而不是帶索引幾何。
-      const point = record.vertices?.[vertexIndex];
-      if (point) points.push(point);
-    }
-  }
-  return points;
-}
-
-/**
- * 將逐頂點顏色依 TRIANGLE_LIST 點順序同步展開。
- */
-function createTriangleListColors(record) {
   const colors = [];
+  let hasCompleteColors = true;
+
   for (const face of record.faces || []) {
-    for (const vertexIndex of face) {
-      // 頂點顏色使用與三角面點相同的順序展開。
-      const color = record.colors?.[vertexIndex];
-      if (color) colors.push(color);
+    const facePoints = face.map((vertexIndex) => record.vertices?.[vertexIndex]).filter(Boolean);
+    if (facePoints.length !== 3) continue;
+
+    points.push(...facePoints);
+
+    const faceColors = face.map((vertexIndex) => record.colors?.[vertexIndex]).filter(Boolean);
+    if (faceColors.length === 3 && hasCompleteColors) {
+      colors.push(...faceColors);
+    } else {
+      hasCompleteColors = false;
     }
   }
-  return colors.length ? colors : [];
+
+  return {
+    points,
+    // Marker.colors 必須為空陣列，或與 points 長度一致。
+    colors: hasCompleteColors && colors.length === points.length ? colors : []
+  };
 }

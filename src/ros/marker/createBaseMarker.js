@@ -5,6 +5,7 @@ import { createRosIdentity, createRosMarkerId, sanitizeRosNameSegment } from '..
 import { createIdentityPose } from '../../utils/matrix.js';
 import { createRosTime } from '../../utils/rosTime.js';
 import { normalizeColor } from '../../utils/color.js';
+import { SPECKLE_GEOMETRY_TYPES } from '../../speckle/geometryTypes.js';
 import { MARKER_ACTIONS } from '../constants.js';
 
 /**
@@ -14,7 +15,7 @@ import { MARKER_ACTIONS } from '../constants.js';
  * 再 hash 成 ROS 需要的整數 id。
  */
 export function createBaseMarker(record, index, options = {}) {
-  const namespace = sanitizeRosNameSegment(options.namespace || 'speckle_geometry');
+  const namespace = sanitizeRosNameSegment(options.namespace || createDefaultNamespace(record));
   const identity = createRosIdentity(record, {
     ...options,
     fallbackId: `marker_${index}`
@@ -43,4 +44,14 @@ function createHeader(record, options) {
     stamp: createRosTime(options.stamp),
     frame_id: options.frameId || record.frameId || 'world'
   };
+}
+
+/**
+ * 依目前支援的幾何類型建立預設 Marker namespace。
+ */
+function createDefaultNamespace(record) {
+  if (record?.type === SPECKLE_GEOMETRY_TYPES.MESH) return 'speckle_mesh';
+  if (record?.type === SPECKLE_GEOMETRY_TYPES.LINE) return 'speckle_polyline';
+  if (record?.type === SPECKLE_GEOMETRY_TYPES.POINT) return 'speckle_point';
+  return 'speckle_geometry';
 }

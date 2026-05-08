@@ -32,7 +32,7 @@ export function createRosMarkerId(identity) {
     hash = ((hash << 5) - hash + text.charCodeAt(index)) | 0;
   }
 
-  return Math.abs(hash);
+  return Math.abs(hash) % 2147483647;
 }
 
 /**

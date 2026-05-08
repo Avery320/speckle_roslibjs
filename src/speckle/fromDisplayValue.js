@@ -137,7 +137,8 @@ function createPointRecord(item, options) {
   return {
     type: SPECKLE_GEOMETRY_TYPES.POINT,
     id: readStableId(item, options),
-    points: [point],
+    points: points.length ? points : [point],
+    colors: readColors(item, points.length || 1),
     color: readMaterialColor(item, options),
     units: readUnits(item, options),
     source: item

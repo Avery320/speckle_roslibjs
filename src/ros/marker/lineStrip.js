@@ -14,6 +14,6 @@ export function createLineStripMarker(record, index, options = {}) {
   marker.type = MARKER_TYPES.LINE_STRIP;
   marker.scale = { x: Number(options.lineWidth || 0.01), y: 0, z: 0 };
   marker.points = record.points || [];
-  marker.colors = record.colors || [];
+  marker.colors = record.colors?.length === marker.points.length ? record.colors : [];
   return marker.points.length >= 2 ? marker : null;
 }
