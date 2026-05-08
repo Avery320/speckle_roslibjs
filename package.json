@@ -1,0 +1,23 @@
+{
+  "name": "speckle_ros",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Speckle 幾何到 ROS Topic message 的轉譯工具 API。",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": "./src/index.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "example:marker-array": "node examples/marker-array-message.js",
+    "example:publish-circle": "node examples/publish-circle-polyline-roslib.js",
+    "example:publish-cube": "node examples/publish-cube-marker-roslib.js",
+    "example:publish-points": "node examples/publish-random-points-roslib.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "roslib": "^2.1.0"
+  }
+}

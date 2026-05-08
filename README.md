@@ -2,63 +2,72 @@
 
 Speckle 幾何到 ROS 標準 message 的轉譯工具 API。
 
-本專案目前只作為本地開發與測試使用，先不準備發布 npm package。
+本專案目前作為本地開發與測試使用，暫時不發布 npm package。
 
-## 目標
+## 專案邊界
 
-`speckle_ros` 只負責一件事：
+`speckle_ros` 只負責建立 ROS message payload：
 
 ```text
 Speckle geometry -> ROS standard message plain object
 ```
 
-呼叫端再使用 `roslibjs` 或其他 transport 發布到 ROS Topic。
+ROS connection、Topic 建立、publish / subscribe lifecycle、RViz 顯示設定都由呼叫端或範例檔處理。
 
-## 目前準備開發的內容
+## 目前狀態
 
-第一目標是 `visualization_msgs/MarkerArray`：
+| 狀態 | 項目 | 內容 | 主要檔案 |
+| --- | --- | --- | --- |
+| [x] | Public API | 匯出 `speckleToMarkerArrayMessage()`、`speckleToPlanningSceneMessage()` | `src/index.js` |
+| [x] | Speckle adapter | 讀取 Speckle object / displayValue，正規化 mesh、line、point | `src/speckle/` |
+| [x] | Mesh 視覺化 | mesh -> `visualization_msgs/Marker` `TRIANGLE_LIST` | `src/ros/marker/triangleList.js` |
+| [x] | Polyline / Curve 視覺化 | line / polyline / curve -> `LINE_STRIP` | `src/ros/marker/lineStrip.js` |
+| [x] | Point 視覺化 | point / point set -> `POINTS` | `src/ros/marker/points.js` |
+| [x] | MarkerArray 組裝 | 輸出 `{ markers: [] }`，可交給 `ROSLIB.Topic.publish()` | `src/ros/markerArray.js` |
+| [x] | Marker 分類 | 預設 `ns`：`speckle_mesh`、`speckle_polyline`、`speckle_point` | `src/ros/marker/createBaseMarker.js` |
+| [x] | PlanningScene 基礎 | mesh -> `moveit_msgs/PlanningScene` collision object | `src/ros/planningScene.js` |
+| [x] | roslibjs 手動範例 | cube、circle、random points 發布到 rosbridge | `examples/` |
+| [ ] | PlanningScene 手動範例 | 發布 mesh collision object 到 ROS / MoveIt | 待開發 |
+| [ ] | Marker 刪除 helper | 建立 `DELETE` / `DELETEALL` payload helper，不負責 publish | 待討論 |
+| [ ] | 正式單元測試 | 不依賴 ROS，只驗證 message shape | 待開發 |
 
-| Speckle 幾何 | Marker type | 用途 |
-| --- | --- | --- |
-| mesh | `TRIANGLE_LIST` | mesh 視覺化 |
-| line / polyline / curve | `LINE_STRIP` | 線性幾何視覺化 |
-| point | `POINTS` | 少量點、控制點、標記點 |
+## ROS Topic 與 Message
 
-第二目標是 `moveit_msgs/PlanningScene`：
+目前手動發布範例依幾何類型使用不同 Topic。
 
-| Speckle 幾何 | ROS message | 用途 |
-| --- | --- | --- |
-| mesh | `CollisionObject` + `shape_msgs/Mesh` | MoveIt collision world |
+Message type：
 
-## 公開 API
-
-```js
-speckleToMarkerArrayMessage(input, options);
-speckleToPlanningSceneMessage(input, options);
+```text
+visualization_msgs/MarkerArray
 ```
 
-API 輸出是 ROS message plain object，不建立 `ROSLIB.Topic`，也不包裝 `ROSLIB.Message`。
+Topic 是發布策略，核心 API 不處理 topic。範例預設如下：
+
+| Speckle 幾何 | 預設 Topic | Marker `ns` | Marker `type` |
+| --- | --- | --- | --- |
+| mesh | `/speckle/mesh_markers` | `speckle_mesh` | `TRIANGLE_LIST` |
+| line / polyline / curve | `/speckle/line_markers` | `speckle_polyline` | `LINE_STRIP` |
+| point | `/speckle/point_markers` | `speckle_point` | `POINTS` |
 
 ## roslibjs 相容性
 
-輸出必須可以直接交給 `ROSLIB.Topic.publish()`：
+API 輸出是 plain JavaScript object，可以直接交給 `ROSLIB.Topic.publish()`：
 
 ```js
 const topic = new ROSLIB.Topic({
   ros,
-  name: '/speckle/markers',
+  name: '/speckle/mesh_markers',
   messageType: 'visualization_msgs/MarkerArray'
 });
 
 const message = speckleToMarkerArrayMessage(speckleGeometry, {
-  frameId: 'world',
-  namespace: 'speckle_geometry'
+  frameId: 'world'
 });
 
 topic.publish(message);
 ```
 
-Topic 名稱、`messageType`、advertise、queue、reconnect 與 publish 時機都由呼叫端管理。
+核心 API 不建立 `ROSLIB.Ros`、`ROSLIB.Topic` 或 `ROSLIB.Message`。
 
 ## 目前架構
 
@@ -89,18 +98,20 @@ src/
     matrix.js
     rosTime.js
     validation.js
+
+examples/
+  helpers/
+    publishMarkerArray.js
+  README.md
+  marker-array-message.js
+  publish-circle-polyline-roslib.js
+  publish-cube-marker-roslib.js
+  publish-random-points-roslib.js
 ```
 
-## 暫不處理
+## 範例
 
-- ROS connection lifecycle
-- ROS publish / subscribe lifecycle
-- `roslibjs` adapter
-- viewer / rendering
-- 產品 UI 或場景樹
-- 自訂 ROS message
-- `sensor_msgs/PointCloud2`
-- `tf2_msgs/TFMessage`
+範例與手動 ROS 整合測試請見 [examples/README.md](examples/README.md)。
 
 ## 開發文件
 
