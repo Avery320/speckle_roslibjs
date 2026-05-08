@@ -38,7 +38,8 @@ export function speckleToPlanningSceneMessage(input, options = {}) {
  * 面索引會映射到 shape_msgs/MeshTriangle，讓 MoveIt 重建碰撞表面。
  */
 function createCollisionObject(record, index, options) {
-  if (!record.vertices?.length || !record.faces?.length) return null;
+  const mesh = createShapeMesh(record);
+  if (!mesh) return null;
 
   return {
     id: createRosIdentity(record, {
@@ -49,14 +50,77 @@ function createCollisionObject(record, index, options) {
       stamp: createRosTime(options.stamp),
       frame_id: options.frameId || record.frameId || 'world'
     },
-    meshes: [
-      {
-        vertices: record.vertices,
-        // shape_msgs/MeshTriangle 只保存頂點索引；vertices 保留在共用 mesh vertex array。
-        triangles: record.faces.map((face) => ({ vertex_indices: face }))
-      }
-    ],
+    pose: createIdentityPose(),
+    type: { key: '', db: '' },
+    primitives: [],
+    primitive_poses: [],
+    meshes: [mesh],
     mesh_poses: [createIdentityPose()],
+    planes: [],
+    plane_poses: [],
+    subframe_names: [],
+    subframe_poses: [],
     operation: COLLISION_OBJECT_OPERATIONS.ADD
   };
+}
+
+/**
+ * 將正規化 mesh 轉成 shape_msgs/Mesh。
+ *
+ * shape_msgs/Mesh 保留一份 vertices 陣列，triangles 只保存三個頂點索引。
+ * 這與 Marker 的 TRIANGLE_LIST 不同；PlanningScene 不需要展開重複點。
+ */
+function createShapeMesh(record) {
+  const vertices = createMeshVertices(record.vertices);
+  const triangles = createMeshTriangles(record.faces, vertices.length);
+
+  if (vertices.length < 3 || !triangles.length) return null;
+
+  return {
+    triangles,
+    vertices
+  };
+}
+
+/**
+ * 複製 mesh vertices 為 ROS geometry_msgs/Point 結構。
+ */
+function createMeshVertices(vertices = []) {
+  if (!vertices.length) return [];
+
+  const points = vertices.map(createPoint);
+  return points.every(Boolean) ? points : [];
+}
+
+/**
+ * 將 mesh face 索引轉成 shape_msgs/MeshTriangle。
+ *
+ * 每個 triangle 必須剛好有三個有效頂點索引。無效 face 會被跳過，
+ * 避免輸出 MoveIt 無法建立碰撞網格的 message。
+ */
+function createMeshTriangles(faces = [], vertexCount = 0) {
+  return faces
+    .filter((face) => isValidTriangleFace(face, vertexCount))
+    .map((face) => ({
+      vertex_indices: face.map((vertexIndex) => Math.trunc(Number(vertexIndex)))
+    }));
+}
+
+function isValidTriangleFace(face, vertexCount) {
+  return Array.isArray(face)
+    && face.length === 3
+    && face.every((vertexIndex) => {
+      const index = Number(vertexIndex);
+      return Number.isInteger(index) && index >= 0 && index < vertexCount;
+    });
+}
+
+function createPoint(point) {
+  const x = Number(point?.x);
+  const y = Number(point?.y);
+  const z = Number(point?.z);
+
+  if (![x, y, z].every(Number.isFinite)) return null;
+
+  return { x, y, z };
 }

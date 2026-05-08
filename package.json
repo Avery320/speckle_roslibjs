@@ -11,6 +11,7 @@
     "example:marker-array": "node examples/marker-array-message.js",
     "example:publish-circle": "node examples/publish-circle-polyline-roslib.js",
     "example:publish-cube": "node examples/publish-cube-marker-roslib.js",
+    "example:publish-planning-scene": "node examples/publish-sphere-planning-scene-roslib.js",
     "example:publish-points": "node examples/publish-random-points-roslib.js",
     "test": "node --test"
   },

@@ -26,6 +26,7 @@ ws://localhost:9090
 | `publish-cube-marker-roslib.js` | 發布中心在 `(1, 1, 1)` 的 cube mesh | 是 |
 | `publish-circle-polyline-roslib.js` | 發布一條圓形 polyline / curve | 是 |
 | `publish-random-points-roslib.js` | 在方形範圍內發布 20 個隨機點 | 是 |
+| `publish-sphere-planning-scene-roslib.js` | 發布中心在 `(-1, -1, 1)` 的 sphere mesh 到 PlanningScene | 是 |
 | `helpers/publishMarkerArray.js` | examples 專用 roslib 發布 helper | 是 |
 
 ## 建立 Message，不發布
@@ -98,13 +99,32 @@ npm run example:publish-points
 - `POINT_RANGE`：方形範圍邊長，預設 `2`。
 - `POINT_SIZE`：RViz 點尺寸，預設 `0.08`。
 
+## 發布 PlanningScene Sphere
+
+```bash
+npm run example:publish-planning-scene
+```
+
+內容：
+
+- 建立中心在 `(-1, -1, 1)` 的 sphere mesh。
+- 使用 Speckle mesh 的 `vertices` / `faces` 結構。
+- 轉成 `moveit_msgs/PlanningScene` diff。
+- 發布到 `/planning_scene`。
+
+可調參數：
+
+- `SPHERE_RADIUS`：sphere 半徑，預設 `0.5`。
+- `SPHERE_SEGMENTS`：水平方向 mesh 分段數，預設 `24`。
+- `SPHERE_RINGS`：垂直方向 mesh 分段數，預設 `12`。
+
 ## ROS 連線設定
 
-三個 publish 範例共用以下環境變數：
+publish 範例共用以下環境變數：
 
 - `ROSBRIDGE_URL`：rosbridge websocket，預設 `ws://localhost:9090`。
-- `ROS_TOPIC`：覆蓋發布用 Topic。未設定時，cube 使用 `/speckle/mesh_markers`，circle 使用 `/speckle/line_markers`，points 使用 `/speckle/point_markers`。
-- `ROS_FRAME_ID`：Marker header frame，預設 `world`。
+- `ROS_TOPIC`：覆蓋發布用 Topic。未設定時，cube 使用 `/speckle/mesh_markers`，circle 使用 `/speckle/line_markers`，points 使用 `/speckle/point_markers`，PlanningScene 使用 `/planning_scene`。
+- `ROS_FRAME_ID`：ROS Header frame，預設 `world`。
 
 範例：
 
@@ -123,6 +143,14 @@ Topic:
   cube   -> /speckle/mesh_markers
   circle -> /speckle/line_markers
   points -> /speckle/point_markers
+```
+
+PlanningScene sphere 建議確認：
+
+```text
+Topic: /planning_scene
+Message Type: moveit_msgs/PlanningScene
+Collision object center: (-1, -1, 1)
 ```
 
 如果有改 `ROS_FRAME_ID` 或 `ROS_TOPIC`，RViz 也要同步改。

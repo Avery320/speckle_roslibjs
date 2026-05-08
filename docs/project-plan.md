@@ -26,6 +26,7 @@ Speckle geometry
 | [x] | Marker 分類 | 預設 `ns`：`speckle_mesh`、`speckle_polyline`、`speckle_point` |
 | [x] | PlanningScene 基礎 | mesh -> `moveit_msgs/PlanningScene` collision object |
 | [x] | roslibjs 手動整合 | cube、circle、random points 可發布到各自預設 topic |
+| [x] | PlanningScene 手動整合 | sphere mesh 可發布到 `/planning_scene` |
 
 ## 目前 API
 
@@ -44,7 +45,8 @@ speckleToPlanningSceneMessage(input, options);
   color,
   lineWidth,
   pointSize,
-  stamp
+  stamp,
+  isDiff
 }
 ```
 
@@ -52,7 +54,6 @@ speckleToPlanningSceneMessage(input, options);
 
 | 狀態 | 項目 | 說明 |
 | --- | --- | --- |
-| [ ] | PlanningScene 手動範例 | 發布 mesh collision object 到 ROS / MoveIt |
 | [ ] | Marker delete payload helper | 建立 `DELETE` / `DELETEALL` message helper，不負責 publish |
 | [ ] | 正式單元測試 | 不依賴 ROS，只驗證 message shape |
 | [ ] | README 與 docs 持續同步 | README 記錄使用方式，docs 記錄開發規則與計畫 |
@@ -73,8 +74,9 @@ speckleToPlanningSceneMessage(input, options);
 
 - public API 只有 `speckleToMarkerArrayMessage()` 與 `speckleToPlanningSceneMessage()`。
 - output 是 roslibjs-compatible plain object。
-- examples 預設 topic：mesh 使用 `/speckle/mesh_markers`，line 使用 `/speckle/line_markers`，point 使用 `/speckle/point_markers`。
+- examples 預設 topic：mesh 使用 `/speckle/mesh_markers`，line 使用 `/speckle/line_markers`，point 使用 `/speckle/point_markers`，PlanningScene 使用 `/planning_scene`。
 - line / polyline / curve 全部走 `LINE_STRIP`。
+- PlanningScene 只接收 mesh，並輸出 `moveit_msgs/PlanningScene` diff。
 - `unknown` geometry 不自動發布。
 - 核心程式不 import `roslib`。
 - `examples/` 可以作為手動 ROS 整合測試，但不納入自動測試。

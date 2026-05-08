@@ -63,7 +63,8 @@ speckleToPlanningSceneMessage(input, options);
   color,
   lineWidth,
   pointSize,
-  stamp
+  stamp,
+  isDiff
 }
 ```
 
@@ -91,6 +92,7 @@ find src examples -name '*.js' -print0 | xargs -0 -n1 node --check
 npm run example:publish-cube
 npm run example:publish-circle
 npm run example:publish-points
+npm run example:publish-planning-scene
 ```
 
-這個指令需要外部 rosbridge，不納入自動測試。
+這些指令需要外部 rosbridge，不納入自動測試。
