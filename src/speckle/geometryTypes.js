@@ -1,5 +1,5 @@
 /**
- * 定義 speckle_ros 內部使用的幾何分類，供 Speckle 轉接層與 ROS 訊息建構器共用。
+ * 定義 speckle_roslibjs 內部使用的幾何分類，供 Speckle 轉接層與 ROS 訊息建構器共用。
  */
 export const SPECKLE_GEOMETRY_TYPES = Object.freeze({
   MESH: 'mesh',

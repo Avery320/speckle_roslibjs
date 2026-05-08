@@ -1,4 +1,4 @@
-# speckle_ros
+# speckle_roslibjs
 
 Speckle 幾何到 ROS 標準 message 的轉譯工具 API。
 
@@ -6,7 +6,7 @@ Speckle 幾何到 ROS 標準 message 的轉譯工具 API。
 
 ## 專案邊界
 
-`speckle_ros` 只負責建立 ROS message payload：
+`speckle_roslibjs` 只負責建立 ROS message payload：
 
 ```text
 Speckle geometry -> ROS standard message plain object

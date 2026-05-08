@@ -4,11 +4,11 @@
 
 ## 專案定位
 
-`speckle_ros` 是 Speckle 幾何到 ROS 標準 message plain object 的轉譯層。
+`speckle_roslibjs` 是 Speckle 幾何到 ROS 標準 message plain object 的轉譯層。
 
 ```text
 Speckle geometry
-  -> speckle_ros
+  -> speckle_roslibjs
   -> ROS message payload
   -> ROSLIB.Topic.publish(message)
 ```

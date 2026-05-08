@@ -1,6 +1,6 @@
 # examples
 
-本資料夾放 `speckle_ros` 的使用範例與手動 ROS 整合測試。
+本資料夾放 `speckle_roslibjs` 的使用範例與手動 ROS 整合測試。
 
 核心 API 位於 `src/`，不會 import `roslib`。本資料夾中的 publish 範例可以 import `roslib`，用來驗證產生出的 ROS message payload 能透過 rosbridge 發到 ROS。
 

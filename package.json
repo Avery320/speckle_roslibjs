@@ -1,5 +1,5 @@
 {
-  "name": "speckle_ros",
+  "name": "speckle_roslibjs",
   "version": "0.0.0",
   "private": true,
   "description": "Speckle 幾何到 ROS Topic message 的轉譯工具 API。",
